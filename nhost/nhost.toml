@@ -2,3 +2,8 @@
 [postgres]
 version = '14-20230312-1'
 
+# Auth and Hasura must use the same signing key. The value stays in Nhost
+# Settings -> Secrets and is resolved only while the project is deployed.
+[[hasura.jwtSecrets]]
+type = 'HS256'
+key = '{{ secrets.HASURA_GRAPHQL_JWT_SECRET }}'
