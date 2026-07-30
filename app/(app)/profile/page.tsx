@@ -1,0 +1,11 @@
+"use client";
+
+import { Globe2, LogOut, Moon, Sun, Laptop } from "lucide-react";
+import { AppShell, Avatar } from "@/components/app-shell";
+import { Button, Card } from "@/components/ui";
+import { useAuth } from "@/lib/auth-provider";
+import { useI18n } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
+
+export default function ProfilePage() { const { user, signOut } = useAuth(); const { t, lang, setLang } = useI18n(); const { theme, setTheme } = useTheme(); if (!user) return null; return <AppShell title={t("profile")}><Card className="flex items-center gap-4 p-5"><Avatar user={user} /><div className="min-w-0"><h2 className="truncate text-lg font-bold">{user.displayName || "Phrase Pal learner"}</h2><p className="truncate text-sm text-muted-foreground">{user.email}</p></div></Card><div className="mt-5 space-y-3"><SettingGroup icon={<Moon className="h-4 w-4" />} label={t("theme")}><div className="flex flex-wrap gap-2">{(["dark", "light", "system"] as const).map((value) => <button key={value} onClick={() => setTheme(value)} className={`rounded-xl border px-3 py-2 text-sm ${theme === value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>{value === "dark" ? <Moon className="mr-1.5 inline h-4 w-4" /> : value === "light" ? <Sun className="mr-1.5 inline h-4 w-4" /> : <Laptop className="mr-1.5 inline h-4 w-4" />}{t(value)}</button>)}</div></SettingGroup><SettingGroup icon={<Globe2 className="h-4 w-4" />} label={t("language")}><div className="flex gap-2">{(["uk", "en"] as const).map((value) => <button key={value} onClick={() => setLang(value)} className={`rounded-xl border px-3 py-2 text-sm uppercase ${lang === value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>{value}</button>)}</div></SettingGroup></div><Button variant="danger" className="mt-6 w-full" onClick={() => void signOut()}><LogOut className="h-4 w-4" />{t("signOut")}</Button></AppShell>; }
+function SettingGroup({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) { return <Card className="p-4"><div className="mb-3 flex items-center gap-2 text-sm font-semibold">{icon}{label}</div>{children}</Card>; }

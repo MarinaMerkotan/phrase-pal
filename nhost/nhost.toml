@@ -1,0 +1,4 @@
+# Project-level Nhost configuration. Secrets and project identity stay outside Git.
+[postgres]
+version = '14-20230312-1'
+

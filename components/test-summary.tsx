@@ -1,0 +1,9 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Check, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { Button, Card } from "./ui";
+
+export function TestSummary({ setId, correct, total, onAgain }: { setId: string; correct: number; total: number; onAgain: () => void }) { const { t } = useI18n(); const router = useRouter(); const percent = total ? Math.round(correct / total * 100) : 0; return <div className="mx-auto max-w-md py-10 text-center"><div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary/15 text-primary"><Check className="h-8 w-8" /></div><h2 className="mt-5 text-2xl font-bold">{t("testResults")}</h2><p className="mt-2 text-sm text-muted-foreground">{t("percent")}: {percent}%</p><Card className="mt-7 grid grid-cols-3 gap-3 p-4"><div><p className="text-2xl font-bold text-success">{correct}</p><p className="text-xs text-muted-foreground">{t("correctAnswers")}</p></div><div><p className="text-2xl font-bold text-destructive">{total - correct}</p><p className="text-xs text-muted-foreground">{t("incorrectAnswers")}</p></div><div><p className="text-2xl font-bold text-primary">{total}</p><p className="text-xs text-muted-foreground">{t("words")}</p></div></Card><div className="mt-7 flex gap-2"><Button variant="secondary" className="flex-1" onClick={onAgain}>{t("again")}</Button><Button className="flex-1" onClick={() => router.push(`/sets/${setId}`)}>{t("complete")}</Button></div></div>; }
+export function AnswerState({ correct, answer }: { correct: boolean; answer: string }) { const { t } = useI18n(); return <div className={correct ? "rounded-xl bg-success/10 p-3 text-sm text-success" : "rounded-xl bg-destructive/10 p-3 text-sm text-destructive"}>{correct ? <Check className="mr-2 inline h-4 w-4" /> : <X className="mr-2 inline h-4 w-4" />}{correct ? t("correct") : `${t("incorrect")}. ${t("showAnswer")}: ${answer}`}</div>; }
