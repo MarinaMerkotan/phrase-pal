@@ -4,5 +4,6 @@ out
 .env*
 .env.local
 !.env.example
+.secrets
 .nhost
 *.tsbuildinfo

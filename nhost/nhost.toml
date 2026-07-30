@@ -1,9 +1,35 @@
-# Project-level Nhost configuration. Secrets and project identity stay outside Git.
-[postgres]
-version = '14-20230312-1'
+# Project-level Nhost configuration synchronized with the cloud project.
+# Sensitive values are resolved from Nhost Settings -> Secrets at deploy time.
+[auth]
+version = "0.49.1"
 
-# Auth and Hasura must use the same signing key. The value stays in Nhost
-# Settings -> Secrets and is resolved only while the project is deployed.
+[auth.method.oauth.google]
+audience = ""
+clientId = "286289550827-ma4nq3frbt8avbjetrm18jp7tj1pob9f.apps.googleusercontent.com"
+clientSecret = "{{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}"
+enabled = true
+scope = [ ]
+
+[auth.redirections]
+allowedUrls = [
+  "https://phrase-pal-olive.vercel.app/auth/callback",
+  "http://localhost:3000/auth/callback",
+]
+clientUrl = "https://phrase-pal-olive.vercel.app"
+
+[hasura]
+adminSecret = "{{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}"
+version = "v2.48.10-ce"
+webhookSecret = "{{ secrets.NHOST_WEBHOOK_SECRET }}"
+
 [[hasura.jwtSecrets]]
-type = 'HS256'
-key = '{{ secrets.HASURA_GRAPHQL_JWT_SECRET }}'
+key = "{{ secrets.NHOST_JWT_PUBLIC_KEY }}"
+kid = "{{ secrets.NHOST_JWT_KID }}"
+signingKey = "{{ secrets.NHOST_JWT_PRIVATE_KEY }}"
+type = "RS256"
+
+[postgres]
+version = "14.20-20251217-1"
+
+[storage]
+version = "0.14.0"
