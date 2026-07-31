@@ -2,7 +2,7 @@
 
 import { Check, ChevronLeft, ChevronRight, RotateCw, Shuffle, Volume2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button, Card, ProgressBar } from "@/components/ui";
 import { getSet, updateCard } from "@/lib/nhost/graphql";
@@ -10,12 +10,30 @@ import type { VocabularySet } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
 
+const CARD_FLIP_DURATION_MS = 600;
+
 export default function StudyPage() {
   const { setId } = useParams<{ setId: string }>(); const router = useRouter(); const { t } = useI18n(); const { speak } = useSpeech(); const [set, setSet] = useState<VocabularySet | null>(null); const [filter, setFilter] = useState<"all" | "learning">("all"); const [direction, setDirection] = useState<"en_uk" | "uk_en">("en_uk"); const [order, setOrder] = useState<string[]>([]); const [index, setIndex] = useState(0); const [flipped, setFlipped] = useState(false); const [done, setDone] = useState(false); const [marked, setMarked] = useState({ learning: 0, learned: 0 });
+  const nextCardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => { void getSet(setId).then((next) => { setSet(next); setOrder((next?.cards ?? []).map((card) => card.id)); }); }, [setId]);
   const cards = useMemo(() => (set?.cards ?? []).filter((card) => filter === "all" || card.status === "learning"), [filter, set]);
   const current = cards.find((card) => card.id === order[index]) ?? cards[index];
-  const goNext = useCallback(() => { setFlipped(false); if (index >= cards.length - 1) setDone(true); else setIndex((value) => value + 1); }, [cards.length, index]);
+  const advance = useCallback(() => { if (index >= cards.length - 1) setDone(true); else setIndex((value) => value + 1); }, [cards.length, index]);
+  const goNext = useCallback(() => {
+    if (nextCardTimer.current) return;
+    if (!flipped) {
+      advance();
+      return;
+    }
+    setFlipped(false);
+    nextCardTimer.current = setTimeout(() => {
+      nextCardTimer.current = null;
+      advance();
+    }, CARD_FLIP_DURATION_MS);
+  }, [advance, flipped]);
+  useEffect(() => () => {
+    if (nextCardTimer.current) clearTimeout(nextCardTimer.current);
+  }, []);
   useEffect(() => { const keydown = (event: KeyboardEvent) => { const target = event.target as HTMLElement; if (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return; if (event.code === "Space") { event.preventDefault(); setFlipped((value) => !value); } if (event.key === "ArrowRight") goNext(); if (event.key === "ArrowLeft") { setFlipped(false); setIndex((value) => Math.max(0, value - 1)); } }; window.addEventListener("keydown", keydown); return () => window.removeEventListener("keydown", keydown); }, [goNext]);
   const restart = () => { setIndex(0); setFlipped(false); setDone(false); setMarked({ learning: 0, learned: 0 }); setOrder(cards.map((card) => card.id)); };
   const shuffle = () => { setOrder([...cards.map((card) => card.id)].sort(() => Math.random() - 0.5)); setIndex(0); setFlipped(false); setDone(false); };
