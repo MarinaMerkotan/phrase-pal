@@ -26,6 +26,8 @@ const selfCheckDictionaries: Record<Lang, Dictionary> = {
     selfCheckDoneBody: "Ти самостійно повторив увесь набір — без оцінок і розпізнавання голосу.",
     phrasesReviewed: "фраз переглянуто",
     selfCheckShortcut: "Пробіл або Enter — відкрити відповідь / перейти далі",
+    noLearnedSelfCheck: "Ще немає вивчених слів",
+    noLearnedSelfCheckBody: "Познач слова як вивчені або обери «Усі», щоб перевірити весь набір.",
   },
   en: {
     selfCheck: "Self-check",
@@ -38,6 +40,8 @@ const selfCheckDictionaries: Record<Lang, Dictionary> = {
     selfCheckDoneBody: "You reviewed the whole set yourself — with no scoring or voice recognition.",
     phrasesReviewed: "phrases reviewed",
     selfCheckShortcut: "Space or Enter — reveal the answer / continue",
+    noLearnedSelfCheck: "No learned words yet",
+    noLearnedSelfCheckBody: "Mark some words as learned or choose “All” to review the whole set.",
   },
 };
 

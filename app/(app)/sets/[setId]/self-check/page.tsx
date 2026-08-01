@@ -10,6 +10,8 @@ import { useI18n } from "@/lib/i18n";
 import { getSet } from "@/lib/nhost/graphql";
 import type { VocabularySet } from "@/lib/types";
 
+type SelfCheckScope = "all" | "learned";
+
 function shuffled(ids: string[]) {
   const next = [...ids];
   for (let index = next.length - 1; index > 0; index -= 1) {
@@ -29,6 +31,7 @@ export default function SelfCheckPage() {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [done, setDone] = useState(false);
+  const [scope, setScope] = useState<SelfCheckScope>("all");
 
   useEffect(() => {
     void getSet(setId).then((next) => {
@@ -41,8 +44,9 @@ export default function SelfCheckPage() {
     if (!set) return [];
     return order
       .map((id) => set.cards.find((card) => card.id === id))
-      .filter((card): card is VocabularySet["cards"][number] => Boolean(card));
-  }, [order, set]);
+      .filter((card): card is VocabularySet["cards"][number] => Boolean(card))
+      .filter((card) => scope === "all" || card.status === "learned");
+  }, [order, scope, set]);
   const current = cards[index];
 
   const goNext = useCallback(() => {
@@ -89,6 +93,11 @@ export default function SelfCheckPage() {
     restart();
   };
 
+  const chooseScope = (nextScope: SelfCheckScope) => {
+    setScope(nextScope);
+    restart();
+  };
+
   if (!set) {
     return (
       <AppShell title={t("loading")} back={`/sets/${setId}`} hideNav>
@@ -100,10 +109,13 @@ export default function SelfCheckPage() {
   if (cards.length === 0) {
     return (
       <AppShell title={t("selfCheck")} back={`/sets/${setId}`} hideNav>
-        <Card className="p-10 text-center">
-          <h2 className="text-xl font-bold">{t("noCards")}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t("noCardsBody")}</p>
-        </Card>
+        <div className="mx-auto max-w-2xl">
+          <ScopePicker value={scope} onChange={chooseScope} allLabel={t("all")} learnedLabel={t("filterLearned")} />
+          <Card className="p-10 text-center">
+            <h2 className="text-xl font-bold">{scope === "learned" ? t("noLearnedSelfCheck") : t("noCards")}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{scope === "learned" ? t("noLearnedSelfCheckBody") : t("noCardsBody")}</p>
+          </Card>
+        </div>
       </AppShell>
     );
   }
@@ -140,6 +152,7 @@ export default function SelfCheckPage() {
   return (
     <AppShell title={set.title} back={`/sets/${setId}`} hideNav>
       <div className="mx-auto max-w-2xl">
+        <ScopePicker value={scope} onChange={chooseScope} allLabel={t("all")} learnedLabel={t("filterLearned")} />
         <div className="mb-5 flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex justify-between text-xs text-muted-foreground">
@@ -206,5 +219,27 @@ export default function SelfCheckPage() {
         <p className="mt-5 text-center text-xs text-muted-foreground">{t("selfCheckShortcut")}</p>
       </div>
     </AppShell>
+  );
+}
+
+function ScopePicker({ value, onChange, allLabel, learnedLabel }: {
+  value: SelfCheckScope;
+  onChange: (scope: SelfCheckScope) => void;
+  allLabel: string;
+  learnedLabel: string;
+}) {
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+      {(["all", "learned"] as const).map((scope) => (
+        <button
+          key={scope}
+          type="button"
+          onClick={() => onChange(scope)}
+          className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${value === scope ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          {scope === "all" ? allLabel : learnedLabel}
+        </button>
+      ))}
+    </div>
   );
 }
