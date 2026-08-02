@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, GraduationCap, LineChart, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
@@ -14,7 +15,7 @@ export function AppShell({ children, title, back, action, hideNav = false }: { c
   return <div className="min-h-screen bg-background">
     <div className="mx-auto flex min-h-screen max-w-6xl">
       {!hideNav && <aside className="hidden w-64 shrink-0 border-r border-border/70 px-5 py-6 lg:block">
-        <Link href="/sets" className="mb-10 flex items-center gap-2 px-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen className="h-5 w-5" /></span><span className="text-lg font-bold tracking-tight">{t("appName")}</span></Link>
+        <Link href="/sets" className="mb-10 flex items-center gap-2 px-2"><Image src="/logo-cropped.webp" alt="" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" /><span className="text-lg font-bold tracking-tight">{t("appName")}</span></Link>
         <nav className="space-y-1">{nav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium", pathname === href || pathname.startsWith(`${href}/`) ? "bg-primary/12 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground")}><Icon className="h-4 w-4" />{label}</Link>)}</nav>
         {user && <div className="mt-auto pt-10"><Link href="/profile" className="flex items-center gap-3 rounded-xl border border-border/70 bg-card p-3"><Avatar user={user} /><span className="min-w-0"><span className="block truncate text-sm font-semibold">{user.displayName || user.email}</span><span className="block truncate text-xs text-muted-foreground">{user.email}</span></span></Link></div>}
       </aside>}

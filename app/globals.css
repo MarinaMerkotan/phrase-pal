@@ -9,7 +9,237 @@
 * { border-color: var(--border); }
 html, body { min-height: 100%; background: var(--background); color: var(--foreground); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
 button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+:where(
+  button:not(:disabled),
+  a[href],
+  [role="button"]:not([aria-disabled="true"]),
+  [role="link"]:not([aria-disabled="true"]),
+  summary,
+  label[for],
+  select:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled)
+) { cursor: pointer; }
+:where(
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled="true"]
+) { cursor: not-allowed; }
 .preserve-3d { transform-style: preserve-3d; }
 .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .flip-transition { transition: transform .6s cubic-bezier(.4,0,.2,1); }
 .rotate-y-180 { transform: rotateY(180deg); }
+
+/* Landing page motion and interaction */
+.landing-shell {
+  isolation: isolate;
+  background-image:
+    radial-gradient(circle at 67% 46%, color-mix(in oklch, var(--primary) 9%, transparent) 0, transparent 31%),
+    linear-gradient(145deg, color-mix(in oklch, var(--background) 94%, var(--primary)) 0%, var(--background) 46%);
+}
+.landing-grid {
+  z-index: -2;
+  opacity: .16;
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--primary) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--primary) 22%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at 65% 48%, black, transparent 66%);
+}
+.landing-orb {
+  position: absolute;
+  z-index: -1;
+  width: 22rem;
+  height: 22rem;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: .09;
+  pointer-events: none;
+  background: var(--primary);
+  animation: landing-orbit 16s ease-in-out infinite alternate;
+}
+.landing-orb-one { top: -10rem; right: 6%; }
+.landing-orb-two {
+  bottom: -12rem;
+  left: 8%;
+  width: 18rem;
+  height: 18rem;
+  animation-delay: -8s;
+  animation-direction: alternate-reverse;
+}
+.landing-enter {
+  opacity: 0;
+  animation: landing-enter .75s cubic-bezier(.2,.8,.2,1) var(--enter-delay, 0ms) forwards;
+}
+.landing-auth-card {
+  transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease;
+}
+.landing-auth-card:hover {
+  border-color: color-mix(in oklch, var(--primary) 45%, var(--border));
+  box-shadow: 0 18px 55px color-mix(in oklch, var(--primary) 9%, transparent);
+  transform: translateY(-2px);
+}
+.landing-google-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / .24) 48%, transparent 72%);
+  transform: translateX(-120%);
+  transition: transform .65s ease;
+}
+.landing-google-button:hover::after { transform: translateX(120%); }
+.landing-preview-enter {
+  opacity: 0;
+  animation: landing-preview-enter .9s cubic-bezier(.2,.85,.2,1) .22s forwards;
+}
+.landing-preview-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glow-x: 50%;
+  --glow-y: 50%;
+  transform: perspective(1100px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) rotateZ(-4deg);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform .18s ease-out, border-color .3s ease, box-shadow .3s ease;
+}
+.landing-preview-card:hover {
+  border-color: color-mix(in oklch, var(--primary) 48%, var(--border));
+  box-shadow: 0 32px 80px color-mix(in oklch, var(--primary) 17%, transparent);
+}
+.landing-card-shine {
+  opacity: 0;
+  background: radial-gradient(circle at var(--glow-x) var(--glow-y), rgb(255 255 255 / .11), transparent 34%);
+  transition: opacity .3s ease;
+}
+.landing-preview-card:hover .landing-card-shine { opacity: 1; }
+.landing-pulse { animation: landing-breathe 5s ease-in-out infinite; }
+.landing-live-dot {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 999px;
+  background: var(--success);
+  box-shadow: 0 0 0 0 color-mix(in oklch, var(--success) 45%, transparent);
+  animation: landing-live 2s ease-out infinite;
+}
+.landing-xp { animation: landing-xp 3.5s ease-in-out infinite; }
+.landing-word { animation: landing-word .48s cubic-bezier(.2,.8,.2,1) both; }
+.landing-dot {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--border);
+  transition: width .3s ease, background-color .3s ease, transform .3s ease;
+}
+.landing-dot:hover { transform: scale(1.35); background: var(--primary); }
+.landing-dot.is-active { width: 1.35rem; background: var(--primary); }
+.landing-stat {
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), background-color .3s ease, color .3s ease;
+}
+.landing-stat:hover {
+  transform: translateY(-4px);
+  background: var(--accent);
+}
+.landing-sound-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+  width: 12px;
+}
+.landing-sound-bars i {
+  width: 2px;
+  height: 3px;
+  border-radius: 99px;
+  background: currentColor;
+}
+.landing-listen.is-speaking .landing-sound-bars i { animation: landing-sound .7s ease-in-out infinite alternate; }
+.landing-listen.is-speaking .landing-sound-bars i:nth-child(2) { animation-delay: -.3s; }
+.landing-listen.is-speaking .landing-sound-bars i:nth-child(3) { animation-delay: -.5s; }
+.landing-float-badge {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--card) 86%, transparent);
+  padding: .55rem .8rem;
+  color: var(--foreground);
+  font-size: .72rem;
+  font-weight: 600;
+  box-shadow: 0 12px 35px rgb(0 0 0 / .12);
+  backdrop-filter: blur(12px);
+  animation: landing-float 5s ease-in-out infinite;
+}
+.landing-float-badge-left { left: -4.2rem; bottom: 21%; }
+.landing-float-badge-right { right: -3.2rem; top: 14%; animation-delay: -2.5s; }
+
+@keyframes landing-enter {
+  from { opacity: 0; transform: translateY(18px); filter: blur(7px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes landing-preview-enter {
+  from { opacity: 0; transform: translateX(42px) scale(.96); filter: blur(8px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+@keyframes landing-orbit {
+  from { transform: translate3d(-2rem, -1rem, 0) scale(.9); }
+  to { transform: translate3d(3rem, 2rem, 0) scale(1.14); }
+}
+@keyframes landing-breathe {
+  0%, 100% { opacity: .55; transform: scale(.92); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+@keyframes landing-live {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--success) 45%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 7px transparent; }
+}
+@keyframes landing-xp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes landing-word {
+  from { opacity: 0; transform: translateY(12px) scale(.96); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes landing-sound {
+  from { height: 3px; }
+  to { height: 11px; }
+}
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@media (max-width: 1100px) {
+  .landing-float-badge-left { left: -1.4rem; }
+  .landing-float-badge-right { right: -1rem; }
+}
+@media (max-width: 1023px) {
+  .landing-float-badge { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-enter,
+  .landing-preview-enter,
+  .landing-orb,
+  .landing-pulse,
+  .landing-live-dot,
+  .landing-xp,
+  .landing-word,
+  .landing-float-badge,
+  .landing-listen.is-speaking .landing-sound-bars i {
+    animation: none !important;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .landing-preview-card { transform: rotateZ(-4deg); transition-duration: 0s; }
+  .landing-google-button::after { display: none; }
+}

@@ -4,7 +4,14 @@ import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
-export const metadata: Metadata = { title: "Phrase Pal", description: "Learn vocabulary with focused flashcards." };
+export const metadata: Metadata = {
+  title: "Phrase Pal",
+  description: "Learn vocabulary with focused flashcards.",
+  icons: {
+    icon: [{ url: "/logo-cropped.webp", type: "image/webp" }],
+    apple: "/logo-cropped.webp",
+  },
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="uk" suppressHydrationWarning><body><ThemeProvider><I18nProvider><AuthProvider>{children}</AuthProvider></I18nProvider></ThemeProvider></body></html>;

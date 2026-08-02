@@ -16,7 +16,11 @@ export type PronunciationComparison = {
 };
 
 function normalizeWord(value: string) {
-  return value.toLocaleLowerCase("en-US").replace(/[^a-z0-9']/g, "");
+  return value.toLocaleLowerCase("en-US").replace(/[^a-z0-9]/g, "");
+}
+
+function isComparableCharacter(character: string) {
+  return /[a-z0-9]/i.test(character);
 }
 
 function characterMatches(value: string, counterpart: string) {
@@ -52,7 +56,7 @@ function characterMatches(value: string, counterpart: string) {
 
   let normalizedIndex = 0;
   return source.map((character) => {
-    const isComparable = /[a-z0-9']/i.test(character);
+    const isComparable = isComparableCharacter(character);
     const correct = !isComparable || matchedIndexes.has(normalizedIndex);
     if (isComparable) normalizedIndex += 1;
     return { character, correct };
@@ -109,10 +113,10 @@ export function comparePronunciation(expectedSentence: string, spokenSentence: s
     expectedCharacters: expected ? characterMatches(expected, spoken ?? "") : [],
     spokenCharacters: spoken ? characterMatches(spoken, expected ?? "") : [],
   }));
-  const expectedCharacterCount = [...expectedWords.join("")].filter((character) => /[a-z0-9']/i.test(character)).length;
-  const spokenCharacterCount = [...spokenWords.join("")].filter((character) => /[a-z0-9']/i.test(character)).length;
+  const expectedCharacterCount = [...expectedWords.join("")].filter(isComparableCharacter).length;
+  const spokenCharacterCount = [...spokenWords.join("")].filter(isComparableCharacter).length;
   const correctCharacterCount = words.reduce(
-    (total, word) => total + word.expectedCharacters.filter(({ character, correct }) => /[a-z0-9']/i.test(character) && correct).length,
+    (total, word) => total + word.expectedCharacters.filter(({ character, correct }) => isComparableCharacter(character) && correct).length,
     0,
   );
 
