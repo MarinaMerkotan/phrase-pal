@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { SET_TAGS } from "./types";
 
 export const setSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(120),
   description: z.string().trim().max(500).optional().or(z.literal("")),
+  tags: z.array(z.enum(SET_TAGS)).max(SET_TAGS.length),
 });
 
 export const cardSchema = z.object({

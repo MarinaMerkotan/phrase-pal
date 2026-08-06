@@ -1,5 +1,5 @@
 import { nhost } from "./client";
-import type { CardStatus, VocabularyCard, VocabularySet } from "../types";
+import type { CardStatus, SetTag, VocabularyCard, VocabularySet } from "../types";
 
 type GraphQLResponse<T> = { data?: T };
 type SetRow = Omit<VocabularySet, "cards"> & { vocabulary_cards: VocabularyCard[] };
@@ -15,7 +15,9 @@ async function request<T, V extends Record<string, unknown> = Record<string, nev
   return body.data;
 }
 
-const setFields = `id user_id title description created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
+const setFields = `id user_id title description tags created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
+
+type SetInput = { title: string; description?: string | null; tags: SetTag[] };
 
 export async function listSets(search = "") {
   const data = await request<{ vocabulary_sets: SetRow[] }, { search: string }>(`query ListSets($search: String!) { vocabulary_sets(where: { title: { _ilike: $search } }, order_by: { updated_at: desc }) { ${setFields} } }`, { search: `%${search}%` });
@@ -27,13 +29,13 @@ export async function getSet(id: string) {
   return data.vocabulary_sets_by_pk ? toSet(data.vocabulary_sets_by_pk) : null;
 }
 
-export async function createSet(input: { title: string; description?: string | null }) {
-  const data = await request<{ insert_vocabulary_sets_one: SetRow }, { object: { title: string; description?: string | null } }>(`mutation CreateSet($object: vocabulary_sets_insert_input!) { insert_vocabulary_sets_one(object: $object) { ${setFields} } }`, { object: input });
+export async function createSet(input: SetInput) {
+  const data = await request<{ insert_vocabulary_sets_one: SetRow }, { object: SetInput }>(`mutation CreateSet($object: vocabulary_sets_insert_input!) { insert_vocabulary_sets_one(object: $object) { ${setFields} } }`, { object: input });
   return toSet(data.insert_vocabulary_sets_one);
 }
 
-export async function updateSet(id: string, input: { title: string; description?: string | null }) {
-  const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; object: { title: string; description?: string | null } }>(`mutation UpdateSet($id: uuid!, $object: vocabulary_sets_set_input!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: $object) { ${setFields} } }`, { id, object: input });
+export async function updateSet(id: string, input: SetInput) {
+  const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; object: SetInput }>(`mutation UpdateSet($id: uuid!, $object: vocabulary_sets_set_input!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: $object) { ${setFields} } }`, { id, object: input });
   return toSet(data.update_vocabulary_sets_by_pk);
 }
 

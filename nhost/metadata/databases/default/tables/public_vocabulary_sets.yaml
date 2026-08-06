@@ -12,7 +12,7 @@ array_relationships:
 select_permissions:
   - role: user
     permission:
-      columns: [id, user_id, title, description, created_at, updated_at]
+      columns: [id, user_id, title, description, tags, created_at, updated_at]
       filter:
         user_id:
           _eq: X-Hasura-User-Id
@@ -22,13 +22,13 @@ insert_permissions:
       check:
         user_id:
           _eq: X-Hasura-User-Id
-      columns: [id, user_id, title, description, created_at, updated_at]
+      columns: [id, user_id, title, description, tags, created_at, updated_at]
       set:
         user_id: x-hasura-user-id
 update_permissions:
   - role: user
     permission:
-      columns: [title, description, updated_at]
+      columns: [title, description, tags, updated_at]
       filter:
         user_id:
           _eq: X-Hasura-User-Id

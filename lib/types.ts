@@ -1,5 +1,8 @@
 export type CardStatus = "learning" | "learned";
 
+export const SET_TAGS = ["phrases", "nouns", "verbs", "adjectives", "adverbs", "development", "other"] as const;
+export type SetTag = (typeof SET_TAGS)[number];
+
 export type VocabularyCard = {
   id: string;
   set_id: string;
@@ -19,6 +22,7 @@ export type VocabularySet = {
   user_id: string;
   title: string;
   description: string | null;
+  tags: SetTag[];
   created_at: string;
   updated_at: string;
   cards: VocabularyCard[];
