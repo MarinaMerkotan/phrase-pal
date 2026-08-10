@@ -23,6 +23,7 @@ export type VocabularySet = {
   title: string;
   description: string | null;
   tags: SetTag[];
+  is_pinned: boolean;
   created_at: string;
   updated_at: string;
   cards: VocabularyCard[];

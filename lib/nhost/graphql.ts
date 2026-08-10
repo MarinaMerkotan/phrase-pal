@@ -15,12 +15,12 @@ async function request<T, V extends Record<string, unknown> = Record<string, nev
   return body.data;
 }
 
-const setFields = `id user_id title description tags created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
+const setFields = `id user_id title description tags is_pinned created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
 
 type SetInput = { title: string; description?: string | null; tags: SetTag[] };
 
 export async function listSets(search = "") {
-  const data = await request<{ vocabulary_sets: SetRow[] }, { search: string }>(`query ListSets($search: String!) { vocabulary_sets(where: { title: { _ilike: $search } }, order_by: { updated_at: desc }) { ${setFields} } }`, { search: `%${search}%` });
+  const data = await request<{ vocabulary_sets: SetRow[] }, { search: string }>(`query ListSets($search: String!) { vocabulary_sets(where: { title: { _ilike: $search } }, order_by: [{ is_pinned: desc }, { updated_at: desc }]) { ${setFields} } }`, { search: `%${search}%` });
   return data.vocabulary_sets.map(toSet);
 }
 
@@ -36,6 +36,11 @@ export async function createSet(input: SetInput) {
 
 export async function updateSet(id: string, input: SetInput) {
   const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; object: SetInput }>(`mutation UpdateSet($id: uuid!, $object: vocabulary_sets_set_input!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: $object) { ${setFields} } }`, { id, object: input });
+  return toSet(data.update_vocabulary_sets_by_pk);
+}
+
+export async function updateSetPinned(id: string, isPinned: boolean) {
+  const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; is_pinned: boolean }>(`mutation UpdateSetPinned($id: uuid!, $is_pinned: Boolean!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: { is_pinned: $is_pinned }) { ${setFields} } }`, { id, is_pinned: isPinned });
   return toSet(data.update_vocabulary_sets_by_pk);
 }
 
