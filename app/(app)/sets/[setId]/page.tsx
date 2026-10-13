@@ -9,6 +9,7 @@ import { SetTags } from "@/components/set-tags";
 import { Badge, Button, Card, Input, ProgressBar } from "@/components/ui";
 import { deleteCard, getSet, updateCard } from "@/lib/nhost/graphql";
 import { getSetStats, type CardStatus, type VocabularySet } from "@/lib/types";
+import { paragraphEnglish, textStats } from "@/lib/text-document";
 import { getErrorMessage } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
@@ -18,6 +19,7 @@ export default function SetDetailPage() {
   const load = () => void getSet(setId).then(setSet).catch((cause) => setError(getErrorMessage(cause))); useEffect(load, [setId]);
   const cards = useMemo(() => (set?.cards ?? []).filter((card) => (filter === "all" || card.status === filter) && `${card.term} ${card.translation}`.toLocaleLowerCase().includes(query.toLocaleLowerCase())), [filter, query, set]);
   if (!set) return <AppShell title={t("loading")} back="/sets"><p className="text-sm text-muted-foreground">{error || t("loading")}</p></AppShell>;
+  if (set.kind === "text") { const stats = textStats(set.text_content); return <AppShell title={set.title} back="/sets" action={<Link href={`/sets/${setId}/edit`}><Button size="sm" variant="secondary"><Pencil className="h-4 w-4" />{t("edit")}</Button></Link>}><div className="space-y-5"><Card className="p-5"><p className="text-sm text-muted-foreground">{set.description || t("textSet")}</p><div className="mt-3 flex flex-wrap gap-2"><Badge>{set.text_content.paragraphs.length} {t("paragraphs")}</Badge><Badge>{stats.total} {t("sentences")}</Badge><Badge tone="success">{stats.learned} {t("learned")}</Badge></div><div className="mt-5 flex items-center gap-3"><ProgressBar value={stats.progress} /><span className="text-xs font-bold text-primary">{stats.progress}%</span></div><div className="mt-5 flex flex-wrap gap-2"><Link href={`/sets/${setId}/read`}><Button><BookOpen className="h-4 w-4" />{t("readingMode")}</Button></Link><Link href={`/sets/${setId}/text-study`}><Button variant="secondary">{t("textFlashcards")}</Button></Link><Link href={`/sets/${setId}/import`}><Button variant="secondary"><Download className="h-4 w-4" />{t("importText")}</Button></Link></div></Card>{set.text_content.paragraphs.map((paragraph, index) => <Card key={paragraph.id} className="p-5"><p className="mb-2 text-xs font-semibold text-muted-foreground">{t("paragraph")} {index + 1}</p><p className="leading-relaxed">{paragraphEnglish(paragraph)}</p></Card>)}</div></AppShell>; }
   const stats = getSetStats(set);
   const remove = async (id: string) => { if (!window.confirm(t("deleteConfirm"))) return; try { await deleteCard(id); setSet((current) => current ? { ...current, cards: current.cards.filter((card) => card.id !== id) } : current); } catch (cause) { setError(getErrorMessage(cause)); } };
   const mark = async (id: string, status: CardStatus) => { try { const card = await updateCard(id, { status }); setSet((current) => current ? { ...current, cards: current.cards.map((item) => item.id === id ? card : item) } : current); } catch (cause) { setError(getErrorMessage(cause)); } };

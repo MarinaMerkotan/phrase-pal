@@ -8,6 +8,7 @@ import { SetTags } from "@/components/set-tags";
 import { Badge, Button, Card, Input, ProgressBar } from "@/components/ui";
 import { deleteSet, listSets, updateSetPinned } from "@/lib/nhost/graphql";
 import { getSetStats, type VocabularySet } from "@/lib/types";
+import { textStats } from "@/lib/text-document";
 import { getErrorMessage } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 
@@ -34,8 +35,8 @@ export default function SetsPage() {
     if (pinnedOrder !== 0) return pinnedOrder;
 
     const [field, direction] = sort.split("-") as ["date" | "progress", "asc" | "desc"];
-    const aValue = field === "date" ? Date.parse(a.created_at) : getSetStats(a).progress;
-    const bValue = field === "date" ? Date.parse(b.created_at) : getSetStats(b).progress;
+    const aValue = field === "date" ? Date.parse(a.created_at) : (a.kind === "text" ? textStats(a.text_content) : getSetStats(a)).progress;
+    const bValue = field === "date" ? Date.parse(b.created_at) : (b.kind === "text" ? textStats(b.text_content) : getSetStats(b)).progress;
     const sortedValue = (aValue - bValue) * (direction === "asc" ? 1 : -1);
 
     return sortedValue || b.created_at.localeCompare(a.created_at);
@@ -102,7 +103,7 @@ export default function SetsPage() {
       {error && <p className="mb-4 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       {loading ? <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2"><Card className="h-36 animate-pulse bg-muted/50" /><Card className="h-36 animate-pulse bg-muted/50" /></div> : sets.length === 0 ? <Card className="border-dashed p-10 text-center"><div className="mx-auto mb-4 text-4xl">📚</div><h2 className="font-semibold">{t("emptySets")}</h2><p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{t("emptySetsBody")}</p><Link href="/sets/new" className="mt-5 inline-flex"><Button><Plus className="h-4 w-4" />{t("newSet")}</Button></Link></Card> : <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
         {sortedSets.map((set) => {
-          const stats = getSetStats(set);
+          const stats = set.kind === "text" ? textStats(set.text_content) : getSetStats(set);
           return <Card key={set.id} className="group relative min-w-0 max-w-full p-5 transition-[border-color,box-shadow] duration-300 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5">
             <div className="flex min-w-0 items-start justify-between gap-3">
               <Link href={`/sets/${set.id}`} className="block min-w-0 flex-1 overflow-hidden">
@@ -110,7 +111,7 @@ export default function SetsPage() {
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{set.description || "No description"}</p>
               </Link>
               <div className="flex shrink-0 gap-1">
-                <Link href={`/sets/${set.id}/study`} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent hover:text-primary" title={t("study")}><GraduationCap className="h-4 w-4" /></Link>
+                <Link href={set.kind === "text" ? `/sets/${set.id}/text-study` : `/sets/${set.id}/study`} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent hover:text-primary" title={t("study")}><GraduationCap className="h-4 w-4" /></Link>
                 <details className="relative"><summary className="grid h-8 w-8 list-none place-items-center rounded-lg text-muted-foreground hover:bg-accent"><MoreHorizontal className="h-4 w-4" /></summary>
                   <div className="absolute right-0 top-9 z-10 w-40 rounded-xl border border-border bg-card p-1 shadow-xl">
                     <button onClick={() => void togglePin(set)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs hover:bg-accent"><Pin className="h-3.5 w-3.5" />{set.is_pinned ? t("unpin") : t("pin")}</button>
@@ -121,7 +122,7 @@ export default function SetsPage() {
               </div>
             </div>
             <SetTags tags={set.tags} className="mt-2.5" />
-            <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground"><span>{stats.total} {t("words")}</span><span className="font-semibold text-primary">{stats.progress}%</span></div>
+            <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground"><span>{stats.total} {t(set.kind === "text" ? "sentences" : "words")}</span><span className="font-semibold text-primary">{stats.progress}%</span></div>
             <ProgressBar value={stats.progress} />
             <div className="mt-3 flex flex-wrap gap-1.5"><Badge tone="success">{stats.learned} {t("learned")}</Badge><Badge tone="warning">{stats.learning} {t("learning")}</Badge></div>
           </Card>;
