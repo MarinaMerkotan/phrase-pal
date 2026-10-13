@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:text": "node --test tests/text-document.test.cjs",
     "nhost:version": "nhost version",
     "nhost:init": "nhost init",
     "nhost:link": "nhost link",

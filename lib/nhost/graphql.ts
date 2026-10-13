@@ -1,5 +1,5 @@
 import { nhost } from "./client";
-import type { CardStatus, SetTag, VocabularyCard, VocabularySet } from "../types";
+import type { CardStatus, SetTag, TextDocument, VocabularyCard, VocabularySet } from "../types";
 
 type GraphQLResponse<T> = { data?: T };
 type SetRow = Omit<VocabularySet, "cards"> & { vocabulary_cards: VocabularyCard[] };
@@ -15,9 +15,9 @@ async function request<T, V extends Record<string, unknown> = Record<string, nev
   return body.data;
 }
 
-const setFields = `id user_id title description tags is_pinned created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
+const setFields = `id user_id title description tags is_pinned kind text_content created_at updated_at vocabulary_cards { id set_id term translation status position correct_answers incorrect_answers last_reviewed_at created_at updated_at }`;
 
-type SetInput = { title: string; description?: string | null; tags: SetTag[] };
+type SetInput = { title: string; description?: string | null; tags: SetTag[]; kind?: "vocabulary" | "text" };
 
 export async function listSets(search = "") {
   const data = await request<{ vocabulary_sets: SetRow[] }, { search: string }>(`query ListSets($search: String!) { vocabulary_sets(where: { title: { _ilike: $search } }, order_by: [{ is_pinned: desc }, { updated_at: desc }]) { ${setFields} } }`, { search: `%${search}%` });
@@ -36,6 +36,11 @@ export async function createSet(input: SetInput) {
 
 export async function updateSet(id: string, input: SetInput) {
   const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; object: SetInput }>(`mutation UpdateSet($id: uuid!, $object: vocabulary_sets_set_input!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: $object) { ${setFields} } }`, { id, object: input });
+  return toSet(data.update_vocabulary_sets_by_pk);
+}
+
+export async function updateTextContent(id: string, textContent: TextDocument) {
+  const data = await request<{ update_vocabulary_sets_by_pk: SetRow }, { id: string; text_content: TextDocument }>(`mutation UpdateTextContent($id: uuid!, $text_content: jsonb!) { update_vocabulary_sets_by_pk(pk_columns: { id: $id }, _set: { text_content: $text_content }) { ${setFields} } }`, { id, text_content: textContent });
   return toSet(data.update_vocabulary_sets_by_pk);
 }
 

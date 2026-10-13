@@ -22,3 +22,11 @@ pnpm dev
 ```
 
 See [NHOST_SETUP.md](NHOST_SETUP.md) for backend and OAuth setup.
+
+## Text sets
+
+Create a Text set, then paste English paragraphs through **Import text**. A blank line separates paragraphs; the preview lets you edit each detected sentence and add optional Ukrainian translations. The reading page supports sentence playback, text selection, and sentence or paragraph flashcards. Phrase saving uses an existing vocabulary set.
+
+Apply the Nhost migration and metadata in `nhost/migrations/default/202610130001_text_sets` before using Text sets against a backend. Automatic translation is not configured; full-sentence translations can be entered at import, and selected fragments can be translated manually before saving.
+
+Run `pnpm test:text` for import and text-model regression tests.

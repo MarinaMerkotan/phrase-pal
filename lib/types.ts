@@ -1,5 +1,9 @@
 export type CardStatus = "learning" | "learned";
 
+export type TextSentence = { id: string; english: string; ukrainian: string; status: CardStatus };
+export type TextParagraph = { id: string; sentences: TextSentence[]; ukrainian: string };
+export type TextDocument = { version: 1; paragraphs: TextParagraph[] };
+
 export const SET_TAGS = ["phrases", "nouns", "verbs", "adjectives", "adverbs", "development", "other"] as const;
 export type SetTag = (typeof SET_TAGS)[number];
 
@@ -24,6 +28,8 @@ export type VocabularySet = {
   description: string | null;
   tags: SetTag[];
   is_pinned: boolean;
+  kind: "vocabulary" | "text";
+  text_content: TextDocument;
   created_at: string;
   updated_at: string;
   cards: VocabularyCard[];

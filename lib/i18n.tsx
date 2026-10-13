@@ -113,6 +113,15 @@ const selfCheckDictionaries: Record<Lang, Dictionary> = {
   },
 };
 
+const textDictionaries: Record<Lang, Dictionary> = {
+  uk: {
+    setType: "Тип набору", vocabularySet: "Слова й фрази", textSet: "Текст", importText: "Імпортувати текст", englishText: "Англійський текст", optionalUkrainianText: "Український переклад (необов’язково)", plainTextHint: "Встав текст. Відокремлюй абзаци порожнім рядком.", manualTranslationNote: "Автоматичний переклад не налаштовано. Переклад можна додати вручну.", pasteEnglishFirst: "Спочатку встав англійський текст.", translationAlignmentWarning: "Кількість абзаців або речень не збігається. Перевір переклад у попередньому перегляді.", paragraphsReady: "абзаців готово", paragraph: "Абзац", paragraphs: "абзаців", sentences: "речень", paragraphTranslation: "Переклад усього абзацу", duplicateText: "Цей текст уже імпортовано.", emptySentence: "Англійське речення не може бути порожнім.", readingMode: "Читання", textFlashcards: "Картки тексту", sentenceCards: "Речення", paragraphCards: "Абзаци", selectTextHint: "Натисни речення або виділи слово чи фразу для дій.", playWholeText: "Прослухати весь текст", stop: "Зупинити", speed: "Швидкість", noTextYet: "Тут ще немає тексту.", translationMissing: "Перекладу ще немає", sentenceAlignmentMissing: "Для вибору окремих речень додай переклад кожного речення.", showTranslation: "Показати переклад", hideTranslation: "Приховати переклад", selectedTextActions: "Дії з виділеним текстом", listen: "Слухати", translate: "Перекласти", savePhrase: "Зберегти фразу", manualTranslation: "Введи переклад", chooseVocabularySet: "Обери набір слів", createVocabularyFirst: "Спочатку створи набір слів для збереження фраз.", phraseSaved: "Фразу збережено.",
+  },
+  en: {
+    setType: "Set type", vocabularySet: "Words and phrases", textSet: "Text", importText: "Import text", englishText: "English text", optionalUkrainianText: "Ukrainian translation (optional)", plainTextHint: "Paste a text. Separate paragraphs with a blank line.", manualTranslationNote: "Automatic translation is not configured. You can add translations manually.", pasteEnglishFirst: "Paste English text first.", translationAlignmentWarning: "Paragraph or sentence counts do not match. Review translations in the preview.", paragraphsReady: "paragraphs ready", paragraph: "Paragraph", paragraphs: "paragraphs", sentences: "sentences", paragraphTranslation: "Whole paragraph translation", duplicateText: "This text has already been imported.", emptySentence: "English sentences cannot be empty.", readingMode: "Reading", textFlashcards: "Text flashcards", sentenceCards: "Sentences", paragraphCards: "Paragraphs", selectTextHint: "Tap a sentence or select a word or phrase for actions.", playWholeText: "Play whole text", stop: "Stop", speed: "Speed", noTextYet: "No text here yet.", translationMissing: "Translation unavailable", sentenceAlignmentMissing: "Add each sentence translation to select Ukrainian sentences.", showTranslation: "Show translation", hideTranslation: "Hide translation", selectedTextActions: "Selected text actions", listen: "Listen", translate: "Translate", savePhrase: "Save phrase", manualTranslation: "Enter translation", chooseVocabularySet: "Choose a vocabulary set", createVocabularyFirst: "Create a vocabulary set first to save phrases.", phraseSaved: "Phrase saved.",
+  },
+};
+
 const LangContext = createContext<{ lang: Lang; setLang: (lang: Lang) => void; t: (key: string) => string }>({ lang: "uk", setLang: () => undefined, t: (key) => key });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -122,7 +131,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return stored === "uk" || stored === "en" ? stored : "uk";
   });
   const setLang = (next: Lang) => { setLangState(next); window.localStorage.setItem("phrase-pal.lang", next); };
-  const value = useMemo(() => ({ lang, setLang, t: (key: string) => dictionaries[lang][key] ?? selfCheckDictionaries[lang][key] ?? key }), [lang]);
+  const value = useMemo(() => ({ lang, setLang, t: (key: string) => dictionaries[lang][key] ?? selfCheckDictionaries[lang][key] ?? textDictionaries[lang][key] ?? key }), [lang]);
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }
 
